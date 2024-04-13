@@ -46,15 +46,23 @@ for row in table.find_all("tr"):
         print(f"Link: {link.strip()}")
         print()
 
-# Define the directory path
-dir_path = os.path.dirname("./../output/")
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Create the directory if it does not exist
-if not os.path.exists(dir_path):
-    os.makedirs(dir_path)
+# Get the parent directory
+parent_dir = os.path.dirname(script_dir)
 
-# Open a new CSV file in write mode
-with open("./../output/results.csv", "w", newline="") as file:
+# Define the output directory path
+output_dir = os.path.join(parent_dir, "output")
+
+# Create the output directory if it does not exist
+os.makedirs(output_dir, exist_ok=True)
+
+# Define the path of the CSV file
+csv_file_path = os.path.join(output_dir, "results.csv")
+
+# Open the CSV file in write mode
+with open(csv_file_path, "w", newline="") as file:
     writer = csv.writer(file)
 
     # Write the headers to the CSV file

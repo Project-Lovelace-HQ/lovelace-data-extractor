@@ -1,8 +1,10 @@
+import shutil
 from invoke import task
 
 
 @task
 def run(c):
+    shutil.rmtree("output", ignore_errors=True)
     c.run("python src/main.py")
 
 
@@ -29,4 +31,5 @@ def test(c):
 
 @task
 def coverage(c):
+    shutil.rmtree("htmlcov", ignore_errors=True)
     c.run("pytest --cov=src --cov-report html")
