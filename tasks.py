@@ -31,5 +31,7 @@ def test(c):
 
 @task
 def coverage(c):
-    shutil.rmtree("htmlcov", ignore_errors=True)
-    c.run("pytest --cov=src --cov-report html")
+    shutil.rmtree("coverage", ignore_errors=True)
+    c.run(
+        "pytest --cov=src --cov-report=xml:coverage/coverage.xml --cov-report=html:coverage"
+    )
