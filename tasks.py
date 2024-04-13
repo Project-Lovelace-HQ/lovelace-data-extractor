@@ -35,3 +35,8 @@ def coverage(c):
     c.run(
         "pytest --cov=src --cov-report=xml:coverage/coverage.xml --cov-report=html:coverage"
     )
+
+
+@task
+def requirements(c):
+    c.run("pipenv requirements > requirements.txt")
