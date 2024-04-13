@@ -7,13 +7,13 @@ name = "pypi"
 requests = "*"
 beautifulsoup4 = "*"
 black = "*"
-pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
 invoke = "*"
 
 [dev-packages]
 bump2version = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.8"
