@@ -21,6 +21,11 @@ name: Deploy Python project to Azure Function App
 on:
   push:
     branches: ["master"]
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - '.vscode/**'
+      - '.github/**'
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'LovelaceDataExtractor'   # set this to your function app name on Azure
