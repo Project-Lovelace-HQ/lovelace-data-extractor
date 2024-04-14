@@ -48,7 +48,7 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=422,
             )
 
-        url = item.get("url")
+        url = item.get("url") + "?v=anuncios"
         id = item.get("id")
         if url and id:
             try:
