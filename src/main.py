@@ -1,6 +1,7 @@
 import logging
 import azure.functions as func
 import json
+from src.data_extractor.extract_game_data import extract_game_data
 from src.ludopedia_website.fetch_boardgame_by_url import fetch_boardgame_by_url
 
 bp = func.Blueprint()
@@ -22,22 +23,28 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
     try:
         req_body = req.get_json()
     except ValueError:
+        error_message = "Invalid JSON received"
+        logging.error(error_message)
         return func.HttpResponse(
-            "Invalid JSON received",
+            error_message,
             status_code=400,
         )
 
     if not req_body:
+        error_message = "Empty request array received"
+        logging.error(error_message)
         return func.HttpResponse(
-            "Empty request array received",
+            error_message,
             status_code=400,
         )
 
     responses = []
     for item in req_body:
         if not isinstance(item, dict) or "url" not in item or "id" not in item:
+            error_message = "Each item in the JSON array must contain 'url' and 'id'"
+            logging.error(error_message)
             return func.HttpResponse(
-                "Each item in the JSON array must contain 'url' and 'id'",
+                error_message,
                 status_code=422,
             )
 
@@ -46,15 +53,18 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
         if url and id:
             try:
                 game_data_list = fetch_boardgame_by_url(url)
+                extracted_data = extract_game_data(game_data_list)
                 responses.append(
                     ResponseSubscribedGamesUpdatedData(
-                        id, False, game_data_list
+                        id, False, extracted_data
                     ).to_dict()
                 )
-            except Exception:
+            except Exception as e:
+                error_message = f"Error fetching data from {url}"
+                logging.error(f"{error_message}: {e}")
                 responses.append(
                     ResponseSubscribedGamesUpdatedData(
-                        id, True, f"Error fetching data from {url}"
+                        id, True, error_message
                     ).to_dict()
                 )
 
