@@ -35,6 +35,12 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
 
     responses = []
     for item in req_body:
+        if not isinstance(item, dict) or "url" not in item or "id" not in item:
+            return func.HttpResponse(
+                "Each item in the JSON array must contain 'url' and 'id'",
+                status_code=422,
+            )
+
         url = item.get("url")
         id = item.get("id")
         if url and id:
@@ -51,12 +57,6 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
                         id, True, f"Error fetching data from {url}"
                     ).to_dict()
                 )
-
-        else:
-            return func.HttpResponse(
-                "Each item in the JSON array must contain 'url' and 'id'",
-                status_code=400,
-            )
 
     logging.info(f"Responses: {responses}")
 
