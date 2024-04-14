@@ -1,8 +1,23 @@
 from bs4 import BeautifulSoup
 import requests
-import csv
-import os
-import json
+
+
+class SubscribedGameUpdatedData:
+    def __init__(self, city, condition, details, price, link):
+        self.city = city
+        self.condition = condition
+        self.details = details
+        self.price = price
+        self.link = link
+
+    def to_dict(self):
+        return {
+            "city": self.city,
+            "condition": self.condition,
+            "details": self.details,
+            "price": self.price,
+            "link": self.link,
+        }
 
 
 def fetch_boardgame_by_url(url):
@@ -13,18 +28,21 @@ def fetch_boardgame_by_url(url):
     # Parse the HTML content
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # Find the table with the 'Produto' and 'Valor' columns
+    # Find the table with the 'table' class
     table = soup.find("table", {"class": "table"})
 
     # Get the headers of the table
     headers = [header.text for header in table.find_all("th")]
 
-    # Get the index of the columns
-    cidade_index = headers.index("Cidade")
-    condicao_index = headers.index("Condição")
-    obs_index = headers.index("Obs")
-    valor_index = headers.index("Valor")
+    # Get the index of the relevant columns
+    city_index = headers.index("Cidade")
+    condition_index = headers.index("Condição")
+    details_index = headers.index("Obs")
+    price_index = headers.index("Valor")
     link_index = headers.index("Link")
+
+    # Create an empty list to store the rows
+    data = []
 
     # Iterate over the rows in the tbody of the table
     for row in table.find_all("tr"):
@@ -32,76 +50,17 @@ def fetch_boardgame_by_url(url):
 
         # Check if the row has columns
         if columns:
-            # Get the values
-            cidade = columns[cidade_index].text
-            condicao = columns[condicao_index].text
-            obs = columns[obs_index].text
-            valor = columns[valor_index].text
-            link = columns[link_index].text
+            # Get the values from each column
+            city = columns[city_index].text.strip()
+            condition = columns[condition_index].text.strip()
+            details = columns[details_index].text.strip()
+            price = columns[price_index].text.strip()
+            link = columns[link_index].text.strip()
 
-            # Print these values using strip()
-            print(f"Cidade: {cidade.strip()}")
-            print(f"Condição: {condicao.strip()}")
-            if obs:
-                print(f"Obs: {obs.strip()}")
-            print(f"Valor: {valor.strip()}")
-            print(f"Link: {link.strip()}")
-            print()
+            game_data_object = SubscribedGameUpdatedData(
+                city, condition, details, price, link
+            )
+            data.append(game_data_object.to_dict())
 
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Get the parent directory
-    parent_dir = os.path.dirname(script_dir)
-
-    # Define the output directory path
-    output_dir = os.path.join(parent_dir, "output")
-
-    # Create the output directory if it does not exist
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Define the path of the CSV file
-    csv_file_path = os.path.join(output_dir, "results.csv")
-
-    # Open the CSV file in write mode
-    with open(csv_file_path, "w", newline="") as file:
-        writer = csv.writer(file)
-
-        # Write the headers to the CSV file
-        writer.writerow(["Cidade", "Condição", "Obs", "Valor", "Link"])
-
-        # Create an empty list to store the rows
-        data = []
-
-        # Iterate over the rows in the tbody of the table
-        for row in table.find_all("tr"):
-            columns = row.find_all("td")
-
-            # Check if the row has columns
-            if columns:
-                # Get the values
-                cidade = columns[cidade_index].text.strip()
-                condicao = columns[condicao_index].text.strip()
-                obs = columns[obs_index].text.strip() if columns[obs_index].text else ""
-                valor = columns[valor_index].text.strip()
-                link = columns[link_index].text.strip()
-
-                # Write these values to the CSV file
-                writer.writerow([cidade, condicao, obs, valor, link])
-
-                # Add these values to the data list
-                data.append(
-                    {
-                        "Cidade": cidade,
-                        "Condição": condicao,
-                        "Obs": obs,
-                        "Valor": valor,
-                        "Link": link,
-                    }
-                )
-
-    # Convert the data list to a JSON object
-    json_data = json.dumps(data)
-
-    # Return the JSON object
-    return json_data
+    # Return the data list
+    return data
