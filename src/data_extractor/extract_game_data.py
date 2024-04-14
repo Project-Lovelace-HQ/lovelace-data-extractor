@@ -12,7 +12,7 @@ def update_price_in_game(game):
 
 
 def convert_price_to_float(price):
-    return float(price.replace("R$", "").strip().replace(",", "."))
+    return float(price.replace("R$", "").replace(".", "").strip().replace(",", "."))
 
 
 def find_lowest_priced_game(game_list):
