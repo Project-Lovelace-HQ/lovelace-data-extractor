@@ -1,85 +1,78 @@
-from bs4 import BeautifulSoup
-import requests
-import csv
-import os
+import logging
+import azure.functions as func
+import json
+from src.data_extractor.extract_game_data import extract_game_data
+from src.ludopedia_website.fetch_boardgame_by_url import fetch_boardgame_by_url
+
+bp = func.Blueprint()
 
 
-# Make a GET request to the URL
-url = "https://ludopedia.com.br/jogo/frostpunk-the-board-game?v=anuncios"
-response = requests.get(url)
+class ResponseSubscribedGamesUpdatedData:
+    def __init__(self, id, error, response):
+        self.id = id
+        self.error = error
+        self.response = response
 
-# Parse the HTML content
-soup = BeautifulSoup(response.text, "html.parser")
+    def to_dict(self):
+        return {"id": self.id, "error": self.error, "response": self.response}
 
-# Find the table with the 'Produto' and 'Valor' columns
-table = soup.find("table", {"class": "table"})
 
-# Get the headers of the table
-headers = [header.text for header in table.find_all("th")]
+@bp.function_name(name="LovelaceDataExtractor")
+@bp.route(route="LovelaceDataExtractor")
+def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        req_body = req.get_json()
+    except ValueError:
+        error_message = "Invalid JSON received"
+        logging.error(error_message)
+        return func.HttpResponse(
+            error_message,
+            status_code=400,
+        )
 
-# Get the index of the columns
-cidade_index = headers.index("Cidade")
-condicao_index = headers.index("Condição")
-obs_index = headers.index("Obs")
-valor_index = headers.index("Valor")
-link_index = headers.index("Link")
+    if not req_body:
+        error_message = "Empty request array received"
+        logging.error(error_message)
+        return func.HttpResponse(
+            error_message,
+            status_code=400,
+        )
 
-# Iterate over the rows in the tbody of the table
-for row in table.find_all("tr"):
-    columns = row.find_all("td")
+    responses = []
+    for item in req_body:
+        if not isinstance(item, dict) or "url" not in item or "id" not in item:
+            error_message = "Each item in the JSON array must contain 'url' and 'id'"
+            logging.error(error_message)
+            return func.HttpResponse(
+                error_message,
+                status_code=422,
+            )
 
-    # Check if the row has columns
-    if columns:
-        # Get the values
-        cidade = columns[cidade_index].text
-        condicao = columns[condicao_index].text
-        obs = columns[obs_index].text
-        valor = columns[valor_index].text
-        link = columns[link_index].text
+        url = item.get("url")
+        id = item.get("id")
+        if url and id:
+            try:
+                game_data_list = fetch_boardgame_by_url(url)
+                extracted_data = extract_game_data(game_data_list)
+                responses.append(
+                    ResponseSubscribedGamesUpdatedData(
+                        id, False, extracted_data
+                    ).to_dict()
+                )
+            except Exception as e:
+                error_message = f"Error fetching data from {url}"
+                logging.error(f"{error_message}: {e}")
+                responses.append(
+                    ResponseSubscribedGamesUpdatedData(
+                        id, True, error_message
+                    ).to_dict()
+                )
 
-        # Print these values using strip()
-        print(f"Cidade: {cidade.strip()}")
-        print(f"Condição: {condicao.strip()}")
-        if obs:
-            print(f"Obs: {obs.strip()}")
-        print(f"Valor: {valor.strip()}")
-        print(f"Link: {link.strip()}")
-        print()
+    logging.info(f"Responses: {responses}")
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
+    json_string_response = json.dumps(responses)
 
-# Get the parent directory
-parent_dir = os.path.dirname(script_dir)
-
-# Define the output directory path
-output_dir = os.path.join(parent_dir, "output")
-
-# Create the output directory if it does not exist
-os.makedirs(output_dir, exist_ok=True)
-
-# Define the path of the CSV file
-csv_file_path = os.path.join(output_dir, "results.csv")
-
-# Open the CSV file in write mode
-with open(csv_file_path, "w", newline="") as file:
-    writer = csv.writer(file)
-
-    # Write the headers to the CSV file
-    writer.writerow(["Cidade", "Condição", "Obs", "Valor", "Link"])
-
-    # Iterate over the rows in the tbody of the table
-    for row in table.find_all("tr"):
-        columns = row.find_all("td")
-
-        # Check if the row has columns
-        if columns:
-            # Get the values
-            cidade = columns[cidade_index].text.strip()
-            condicao = columns[condicao_index].text.strip()
-            obs = columns[obs_index].text.strip() if columns[obs_index].text else ""
-            valor = columns[valor_index].text.strip()
-            link = columns[link_index].text.strip()
-
-            # Write these values to the CSV file
-            writer.writerow([cidade, condicao, obs, valor, link])
+    return func.HttpResponse(
+        json_string_response,
+        status_code=200,
+    )
