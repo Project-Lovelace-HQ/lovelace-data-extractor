@@ -59,15 +59,13 @@ STATUS CODE: 200
 	{
 		"id": 1,
 		"error": false,
-		"response": [
-			{
-				"city": "Rio de Janeiro",
-				"condition": "Lacrado",
-				"details": "",
-				"price": "R$ 1.142,80",
-				"link": "Anúncio"
-			},
-        ]
+		"response": {
+            "city": "Rio de Janeiro",
+            "condition": "Lacrado",
+            "details": "",
+            "price": 1.142.80,
+            "link": "Anúncio"
+        },
     }
 ]
 ```
