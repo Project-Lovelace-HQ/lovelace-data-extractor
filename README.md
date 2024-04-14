@@ -39,34 +39,32 @@ Fetch the Ludopedia games available for sale.
 
 Request
 
-```json
 POST <AZURE_URL>/api/LovelaceDataExtractor
-
+```json
 [
-    {
-        "url": "https://ludopedia.com.br/jogo/nemesis",
-        "id": "696e89cd-5980-48fa-aba8-610e21d77b21"
-    }
+  {
+    "url": "https://ludopedia.com.br/jogo/nemesis",
+    "id": "696e89cd-5980-48fa-aba8-610e21d77b21"
+  }
 ]
 ```
 
 Response
 
-```json
 STATUS CODE: 200
-
+```json
 [
-	{
-		"id": 1,
-		"error": false,
-		"response": {
-            "city": "Rio de Janeiro",
-            "condition": "Lacrado",
-            "details": "",
-            "price": 1.142.80,
-            "link": "Anúncio"
-        },
+  {
+    "id": 1,
+    "error": false,
+    "response": {
+      "city": "Rio de Janeiro",
+      "condition": "Lacrado",
+      "details": "",
+      "price": 1142.80,
+      "link": "Anúncio"
     }
+  }
 ]
 ```
 
