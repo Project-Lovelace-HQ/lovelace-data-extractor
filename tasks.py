@@ -4,8 +4,7 @@ from invoke import task
 
 @task
 def run(c):
-    shutil.rmtree("output", ignore_errors=True)
-    c.run("python src/main.py")
+    c.run("func start")
 
 
 @task
