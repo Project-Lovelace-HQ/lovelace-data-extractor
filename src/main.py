@@ -53,10 +53,24 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
         if url and id:
             try:
                 game_data_list = fetch_boardgame_by_url(url)
-                extracted_data = extract_game_data(game_data_list)
+
+                if game_data_list is None:
+                    responses.append(
+                        ResponseSubscribedGamesUpdatedData(
+                            id, True, "Erro na busca"
+                        ).to_dict()
+                    )
+                    return
+
+                if isinstance(game_data_list, str):
+                    response_data = game_data_list
+
+                if isinstance(game_data_list, list):
+                    response_data = extract_game_data(game_data_list)
+
                 responses.append(
                     ResponseSubscribedGamesUpdatedData(
-                        id, False, extracted_data
+                        id, False, response_data
                     ).to_dict()
                 )
             except Exception as e:
