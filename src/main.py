@@ -83,7 +83,7 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
                 error_message = f"Error fetching data from {url}"
                 logging.error(error_message)
                 responses.append(
-                    ResponseSubscribedGamesUpdatedData(id, True, e).to_dict()
+                    ResponseSubscribedGamesUpdatedData(id, True, str(e)).to_dict()
                 )
 
     logging.info(f"Responses: {responses}")
