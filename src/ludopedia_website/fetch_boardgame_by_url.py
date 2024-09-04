@@ -64,7 +64,7 @@ def fetch_boardgame_by_url(url):
             link = columns[link_index].text.strip()
 
             # Filter only the data with product_type "Jogo"
-            if product_type == "Jogo":
+            if product_type == "Jogo" and link == "Anúncio":
                 game_data_object = SubscribedGameUpdatedData(
                     product_type, city, condition, details, price, link
                 )
