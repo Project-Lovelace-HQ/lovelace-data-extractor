@@ -31,6 +31,7 @@ def fetch_boardgame_by_url(url):
     headers = [header.text for header in table.find_all("th")]
 
     # Get the index of the relevant columns
+    product_type_index = headers.index("Produto")
     city_index = headers.index("Cidade")
     condition_index = headers.index("Condição")
     details_index = headers.index("Obs")
@@ -55,16 +56,19 @@ def fetch_boardgame_by_url(url):
         # Check if the row has columns
         if columns:
             # Get the values from each column
+            product_type = columns[product_type_index].text.strip()
             city = columns[city_index].text.strip()
             condition = columns[condition_index].text.strip()
             details = columns[details_index].text.strip()
             price = columns[price_index].text.strip()
             link = columns[link_index].text.strip()
 
-            game_data_object = SubscribedGameUpdatedData(
-                city, condition, details, price, link
-            )
-            data.append(game_data_object.to_dict())
+            # Filter only the data with product_type "Jogo"
+            if product_type == "Jogo":
+                game_data_object = SubscribedGameUpdatedData(
+                    product_type, city, condition, details, price, link
+                )
+                data.append(game_data_object.to_dict())
 
     # Return the data list
     return data

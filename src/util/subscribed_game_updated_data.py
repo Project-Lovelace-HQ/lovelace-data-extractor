@@ -1,5 +1,6 @@
 class SubscribedGameUpdatedData:
-    def __init__(self, city, condition, details, price, link):
+    def __init__(self, product_type, city, condition, details, price, link):
+        self.product_type = product_type
         self.city = city
         self.condition = condition
         self.details = details
@@ -8,6 +9,7 @@ class SubscribedGameUpdatedData:
 
     def to_dict(self):
         return {
+            "product_type": self.product_type,
             "city": self.city,
             "condition": self.condition,
             "details": self.details,
