@@ -60,7 +60,10 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
                     response_data = game_data_list
 
                 if isinstance(game_data_list, list):
-                    response_data = extract_game_data(game_data_list)
+                    if len(game_data_list) == 0:
+                        response_data = "Indisponível"
+                    else:
+                        response_data = extract_game_data(game_data_list)
 
                 responses.append(
                     ResponseSubscribedGamesUpdatedData(

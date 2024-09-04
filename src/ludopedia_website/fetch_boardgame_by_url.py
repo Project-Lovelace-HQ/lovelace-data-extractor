@@ -40,7 +40,7 @@ def fetch_boardgame_by_url(url):
     rows = table.find_all("tr")
 
     # Check if the table has any rows
-    if not rows:
+    if not rows or len(rows) == 1:
         # Return an warning if there are no games for sale
         return "Indisponível"
 
