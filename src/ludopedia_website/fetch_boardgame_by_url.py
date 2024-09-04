@@ -1,4 +1,3 @@
-import logging
 from bs4 import BeautifulSoup
 import requests
 
@@ -23,9 +22,8 @@ def fetch_boardgame_by_url(url):
 
     # Check if the table was found
     if table is None:
-        error_message = "Error: Couldn't find the table in the URL - " + url
-        logging.error(error_message)
-        return
+        # throw exception
+        raise Exception("Error: Couldn't find the table in the URL - " + url)
 
     # Get the headers of the table
     headers = [header.text for header in table.find_all("th")]
