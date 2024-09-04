@@ -36,7 +36,7 @@ Fetch the Ludopedia games available for sale.
 **Request Body**
 
 - URL: `"url": "<game-url-on-ludopedia>"` for fetching the price and data.
-- ID: `"id": "<figma id for the game page>"` for updating it with the current data.
+- ID: `"id": "<notion id for the game page>"` for updating it with the current data.
 
 **Examples**
 
