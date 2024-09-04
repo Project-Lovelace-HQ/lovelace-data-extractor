@@ -8,10 +8,12 @@ from src.util.subscribed_game_updated_data import SubscribedGameUpdatedData
 def fetch_boardgame_by_url(url):
     # Make a GET request to the URL
     # URL Example - "https://ludopedia.com.br/jogo/frostpunk-the-board-game?v=anuncios"
-    response = make_request(url)
+    response = requests.get(url)
+    response.raise_for_status()
+
     if response is None:
-        # Error logging is already done in the function above
-        return
+        # throw exception
+        raise Exception("Error: Couldn't fetch the URL - " + url)
 
     # Parse the HTML content
     soup = BeautifulSoup(response.text, "html.parser")
@@ -66,23 +68,3 @@ def fetch_boardgame_by_url(url):
 
     # Return the data list
     return data
-
-
-def make_request(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Check if the request was successful
-        return response
-    except requests.exceptions.HTTPError as errh:
-        error_message = "HTTP Error:" + str(errh)
-        logging.error(error_message)
-    except requests.exceptions.ConnectionError as errc:
-        error_message = "Error Connecting:" + str(errc)
-        logging.error(error_message)
-    except requests.exceptions.Timeout as errt:
-        error_message = "Timeout Error:" + str(errt)
-        logging.error(error_message)
-    except requests.exceptions.RequestException as err:
-        error_message = "Something went wrong" + str(err)
-        logging.error(error_message)
-    return None

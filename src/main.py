@@ -1,6 +1,8 @@
 import logging
 import azure.functions as func
 import json
+
+import requests
 from src.data_extractor.extract_game_data import extract_game_data
 from src.ludopedia_website.fetch_boardgame_by_url import fetch_boardgame_by_url
 
@@ -54,14 +56,6 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 game_data_list = fetch_boardgame_by_url(url)
 
-                if game_data_list is None:
-                    responses.append(
-                        ResponseSubscribedGamesUpdatedData(
-                            id, True, "Erro na busca"
-                        ).to_dict()
-                    )
-                    return
-
                 if isinstance(game_data_list, str):
                     response_data = game_data_list
 
@@ -73,13 +67,23 @@ def LovelaceDataExtractor(req: func.HttpRequest) -> func.HttpResponse:
                         id, False, response_data
                     ).to_dict()
                 )
+            except requests.exceptions.HTTPError as errh:
+                error_message = "HTTP Error:" + str(errh)
+                logging.error(error_message)
+            except requests.exceptions.ConnectionError as errc:
+                error_message = "Error Connecting:" + str(errc)
+                logging.error(error_message)
+            except requests.exceptions.Timeout as errt:
+                error_message = "Timeout Error:" + str(errt)
+                logging.error(error_message)
+            except requests.exceptions.RequestException as err:
+                error_message = "Something went wrong" + str(err)
+                logging.error(error_message)
             except Exception as e:
                 error_message = f"Error fetching data from {url}"
-                logging.error(f"{error_message}: {e}")
+                logging.error(error_message)
                 responses.append(
-                    ResponseSubscribedGamesUpdatedData(
-                        id, True, f"{error_message}: {e}"
-                    ).to_dict()
+                    ResponseSubscribedGamesUpdatedData(id, True, e).to_dict()
                 )
 
     logging.info(f"Responses: {responses}")
